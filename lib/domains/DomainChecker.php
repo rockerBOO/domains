@@ -14,7 +14,6 @@ class DomainChecker {
 
     public function validate() {
         foreach (array_keys($this->hosts) as $host) {
-            // _debug('domain-checker', 'validate ' . $host);
             $this->check($this->get($host));
         }
 
@@ -27,13 +26,10 @@ class DomainChecker {
         }
 
         $this->host = $host;
-
-        // _debug('domain-checker', 'setHost ' . $host);
     }
 
     public function get($host) {
         if (false == $this->load($host)) {
-            // _debug('domain-checker', 'could not load ' . $host);
             return false;
         }
 
@@ -45,7 +41,6 @@ class DomainChecker {
 
         if (apc_exists($key)) {
             $this->hosts[$host] = apc_fetch($key);
-            // _debug('domain-checker', 'Loading from apc: ' . $host);
             return true;
         }
 
@@ -53,16 +48,11 @@ class DomainChecker {
 
         apc_store($key, $this->hosts[$host]);
 
-        // _debug('domain-checker', 'loaded ' . $host);
-
         return true;
     }
 
     public function check(array $dnsRecords) {
         $records = $this->mapRecords($dnsRecords);
-
-        // print_r($recordTypes);
-
         // Look for overall conflicts
         if (array_search('A', $records) && count($records) > 1) {
             throw new DomainCheckerException('Too many A records', 1);
@@ -70,13 +60,6 @@ class DomainChecker {
 
         if (array_search('CNAME', $records) && count($records) > 0 && $this->isRootHost()) {
             throw new DomainCheckerException('CNAME on root domain', 2);
-        }
-
-        foreach ($records as $record => $type) {
-            // Is an A record but not pointed to Virb
-            if ($type == 'A' && $target != '64.207.128.132') {
-                throw new DomainCheckerException('A record not pointing to Virb (' . $target . ')', 3);
-            }
         }
 
         return true;
@@ -105,7 +88,6 @@ class DomainChecker {
                     break;
 
                 default:
-                    // $this->records[$record['host']][] = $record;
                     unset($dnsRecords[$type]);
                     break;
             }
